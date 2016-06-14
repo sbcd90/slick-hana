@@ -4,6 +4,7 @@ import slick.jdbc.HanaProfile.api._
 import slick.lifted.{HanaIndexSortTypes, Tag}
 import slick.lifted.HanaAbstractTable._
 import slick.relational.{HanaTable, HanaTableTypes}
+import slick.sql.SqlProfile.ColumnOption.{NotNull, Nullable}
 
 object HanaTest extends App {
   val db = Database.forConfig("hana")
@@ -12,7 +13,7 @@ object HanaTest extends App {
     class Test1(tag: Tag) extends HanaTable[(Int, String)](tag, Some("I076326"), Some(HanaTableTypes.column), "TEST1") {
 
       def id = column[Int]("ID", O.PrimaryKey)
-      def name = column[String]("NAME", O.PrimaryKey)
+      def name = column[String]("NAME", O.Default("Subho"))
 
       def * = (id, name)
       def idx = this.hanaIndex("idx_a", (id), Seq(HanaIndexSortTypes.desc), true)
@@ -22,7 +23,7 @@ object HanaTest extends App {
 
     class Test2(tag: Tag) extends HanaTable[(Int, String)](tag, Some("I076326"), Some(HanaTableTypes.column), "TEST2") {
       def supp_id = column[Int] ("SUPP_ID")
-      def supp_name = column[String]("SUPP_NAME")
+      def supp_name = column[String]("SUPP_NAME", Nullable)
 
       def * = (supp_id, supp_name)
 

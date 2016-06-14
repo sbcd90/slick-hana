@@ -2,33 +2,35 @@ package slick.jdbc
 
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import slick.lifted.{HanaIndexSortTypes, TableQuery, Tag}
-import slick.relational.HanaTable
+import slick.relational.{HanaTable, HanaTableTypes}
 import slick.lifted.HanaAbstractTable._
 import slick.jdbc.HanaProfile.api._
+import slick.sql.SqlProfile.ColumnOption.{NotNull, Nullable}
 
 class TableDDLBuilderTestSuite extends FunSuite with BeforeAndAfter {
-  class Product(tag: Tag) extends HanaTable[(Int, String)](tag, Some("DUMMY_SCHEMA"), "PRODUCT") {
+  class Product(tag: Tag) extends HanaTable[(Int, String, String)](tag, Some("DUMMY_SCHEMA"), "PRODUCT") {
     def id = column[Int]("ID", O.PrimaryKey)
-    def name = column[String]("NAME", O.SqlType("VARCHAR(20)"))
+    def name = column[String]("NAME", O.SqlType("VARCHAR(20)"), Nullable)
+    def isbnNo = column[String]("ISBN_NO", NotNull)
 
-    def * = (id, name)
+    def * = (id, name, isbnNo)
   }
 
   class Students(tag: Tag) extends HanaTable[(Int, Int, String)](tag, Some("DUMMY_SCHEMA"), "STUDENTS") {
     def standard = column[Int]("STD", O.PrimaryKey)
     def rollno = column[Int]("ROLLNO", O.PrimaryKey)
-    def name = column[String]("NAME")
+    def name = column[String]("NAME", Nullable)
 
     def * = (standard, rollno, name)
   }
 
   class Suppliers(tag: Tag) extends HanaTable[(Int, String, String, String, String, String)](tag, Some("DUMMY_SCHEMA"), "SUPPLIERS") {
     def id = column[Int]("ID", O.PrimaryKey)
-    def name = column[String]("SUP_NAME")
-    def street = column[String]("STREET")
-    def city = column[String]("CITY")
-    def state = column[String]("STATE")
-    def zip = column[String]("ZIP")
+    def name = column[String]("SUP_NAME", Nullable)
+    def street = column[String]("STREET", Nullable)
+    def city = column[String]("CITY", Nullable)
+    def state = column[String]("STATE", Nullable)
+    def zip = column[String]("ZIP", Nullable)
 
     def * = (id, name, street, city, state, zip)
 
@@ -38,10 +40,10 @@ class TableDDLBuilderTestSuite extends FunSuite with BeforeAndAfter {
 
   class Coffees(tag: Tag) extends HanaTable[(String, Int, Double, Int, Int)](tag, Some("DUMMY_SCHEMA"), "COFFEES") {
     def name = column[String]("COF_NAME", O.PrimaryKey)
-    def supID = column[Int]("SUP_ID")
-    def price = column[Double]("PRICE")
-    def sales = column[Int]("SALES")
-    def total = column[Int]("TOTAL")
+    def supID = column[Int]("SUP_ID", Nullable)
+    def price = column[Double]("PRICE", Nullable)
+    def sales = column[Int]("SALES", Nullable)
+    def total = column[Int]("TOTAL", Nullable)
 
     def * = (name, supID, price, sales, total)
     def fk1 = foreignKey("fk1", supID, TableQuery[Suppliers])(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
@@ -49,13 +51,21 @@ class TableDDLBuilderTestSuite extends FunSuite with BeforeAndAfter {
   }
 
   class Employees(tag: Tag) extends HanaTable[(Int, String, String)](tag, Some("DUMMY_SCHEMA"), "EMPLOYEES") {
-    def id = column[Int]("COMPANY_ID")
-    def name = column[String]("COMPANY")
-    def emp_name = column[String]("EMP_NAME")
+    def id = column[Int]("COMPANY_ID", O.PrimaryKey)
+    def name = column[String]("COMPANY", Nullable)
+    def emp_name = column[String]("EMP_NAME", Nullable)
 
     def * = (id, name, emp_name)
     def pk1 = primaryKey("pk1", (name))
     def pk2 = primaryKey("pk2", (id))
+  }
+
+  class Book_Content(tag: Tag) extends HanaTable[(Int, Int, String)](tag, Some("DUMMY_SCHEMA"), Some(HanaTableTypes.column), "BOOK_CONTENT") {
+    def pageno = column[Int]("PAGENO", O.PrimaryKey, O.AutoInc)
+    def lastbookmark = column[Int]("BOOKMARK", O.Default(0))
+    def desc = column[String]("DESCRIPTION", O.SqlType("CHAR(100)"))
+
+    def * = (pageno, lastbookmark, desc)
   }
 
   val product = TableQuery[Product]
@@ -63,6 +73,7 @@ class TableDDLBuilderTestSuite extends FunSuite with BeforeAndAfter {
   val suppliers = TableQuery[Suppliers]
   val coffees = TableQuery[Coffees]
   val employees = TableQuery[Employees]
+  val book_Content = TableQuery[Book_Content]
 
   before {
   }
@@ -70,7 +81,15 @@ class TableDDLBuilderTestSuite extends FunSuite with BeforeAndAfter {
   test("create table statement") {
     val statements = product.schema.createStatements.toList
     assert(statements.size == 1, s"There is only ${statements.size} number of create statements generated")
-    assert(statements.head == "create table \"DUMMY_SCHEMA\".\"PRODUCT\" (\"ID\" INTEGER PRIMARY KEY,\"NAME\" VARCHAR(20))")
+    assert(statements.head == "create table \"DUMMY_SCHEMA\".\"PRODUCT\" (\"ID\" INTEGER NOT NULL PRIMARY KEY,\"NAME\" VARCHAR(20),\"ISBN_NO\" VARCHAR(254) NOT NULL)")
+  }
+
+  test("create column table with default value for fields & with auto-increment fields") {
+    val statements = book_Content.schema.createStatements.toList
+    assert(statements.size == 1)
+    assert(statements.head == "create column table \"DUMMY_SCHEMA\".\"BOOK_CONTENT\" " +
+      "(\"PAGENO\" INTEGER GENERATED BY DEFAULT AS IDENTITY(START WITH 1) NOT NULL PRIMARY KEY,\"BOOKMARK\" " +
+      "INTEGER DEFAULT 0 NOT NULL,\"DESCRIPTION\" CHAR(100) NOT NULL)")
   }
 
   // should throw SlickException
