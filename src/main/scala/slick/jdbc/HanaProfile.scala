@@ -4,7 +4,9 @@ import com.typesafe.config.Config
 import slick.SlickException
 import slick.ast.{FieldSymbol, Node, Select, TableNode}
 import slick.basic.Capability
+import slick.compiler.CompilerState
 import slick.lifted.{HanaIndex, Index, PrimaryKey}
+import slick.util.MacroSupport._
 import slick.relational.{HanaTable, HanaTableTypes}
 
 trait HanaProfile extends JdbcProfile { profile =>
@@ -19,6 +21,7 @@ trait HanaProfile extends JdbcProfile { profile =>
   // used by TableDDLBuilder and ColumnDDLBuilder
   var primaryKeyColumns = 0
 
+  override def createQueryBuilder(n: Node, state: CompilerState): QueryBuilder = new QueryBuilder(n, state)
   override def createTableDDLBuilder(table: Table[_]): TableDDLBuilder = new TableDDLBuilder(table)
   override def createColumnDDLBuilder(column: FieldSymbol, table: Table[_]): ColumnDDLBuilder = new ColumnDDLBuilder(column)
 
@@ -123,6 +126,15 @@ trait HanaProfile extends JdbcProfile { profile =>
         primaryKeyColumns += 1
         sb append " PRIMARY KEY"
       }
+    }
+  }
+
+  class QueryBuilder(tree: Node, state: CompilerState) extends super.QueryBuilder(tree, state) {
+    override protected def buildFetchOffsetClause(fetch: Option[Node], offset: Option[Node]) = (fetch, offset) match {
+      case (Some(t), Some(d)) => b"\nlimit $t offset $d"
+      case (Some(t), None) => b"\nlimit $t"
+      case (None, Some(d)) => throw new SlickException("Offset clause without Limit is not supported by HANA")
+      case _ => // nothing to do
     }
   }
 }

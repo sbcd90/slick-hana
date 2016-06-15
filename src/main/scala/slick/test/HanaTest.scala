@@ -4,7 +4,7 @@ import slick.jdbc.HanaProfile.api._
 import slick.lifted.{HanaIndexSortTypes, Tag}
 import slick.lifted.HanaAbstractTable._
 import slick.relational.{HanaTable, HanaTableTypes}
-import slick.sql.SqlProfile.ColumnOption.{NotNull, Nullable}
+import slick.sql.SqlProfile.ColumnOption.Nullable
 
 object HanaTest extends App {
   val db = Database.forConfig("hana")
@@ -38,6 +38,7 @@ object HanaTest extends App {
     test2.schema.createStatements.foreach(println)
     test2.schema.dropStatements.foreach(println)
     test1.schema.dropStatements.foreach(println)
+    println(test1.filter(_.name === "Subho").result.statements.toList.head)
   } finally {
     db.close()
   }
