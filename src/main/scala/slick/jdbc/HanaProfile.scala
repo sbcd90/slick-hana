@@ -8,6 +8,7 @@ import slick.compiler.CompilerState
 import slick.lifted.{HanaIndex, Index, PrimaryKey}
 import slick.util.MacroSupport._
 import slick.relational.{HanaTable, HanaTableTypes}
+import slick.util.ConstArray
 
 trait HanaProfile extends JdbcProfile { profile =>
 
@@ -135,6 +136,14 @@ trait HanaProfile extends JdbcProfile { profile =>
       case (Some(t), None) => b"\nlimit $t"
       case (None, Some(d)) => throw new SlickException("Offset clause without Limit is not supported by HANA")
       case _ => // nothing to do
+    }
+
+    override protected def buildOrderByClause(order: ConstArray[(Node, slick.ast.Ordering)]) = building(OtherPart) {
+      if (!order.isEmpty) {
+        b"\norder by "
+        val newOrder = order.toArray.reverse
+        b.sep(newOrder, ", "){ case (n, o) => buildOrdering(n, o)}
+      }
     }
   }
 }
