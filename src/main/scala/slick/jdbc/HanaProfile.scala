@@ -13,6 +13,7 @@ import slick.util.ConstArray
 trait HanaProfile extends JdbcProfile { profile =>
 
   override protected def computeCapabilities: Set[Capability] = (super.computeCapabilities
+    - JdbcCapabilities.insertOrUpdate
     - JdbcCapabilities.nullableNoDefault)
 
   override protected[this] def loadProfileConfig: Config = {
