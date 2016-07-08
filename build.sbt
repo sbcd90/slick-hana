@@ -4,9 +4,12 @@ version := "1.0"
 
 scalaVersion := "2.11.8"
 
+resolvers += Resolver.mavenLocal
+
 libraryDependencies ++= Seq(
                           "com.typesafe.slick" %% "slick" % "3.2.0-SNAPSHOT",
                           "org.scalatest" %% "scalatest" % "2.2.6",
-                          "org.slf4j" % "slf4j-nop" % "1.6.4"
+                          "org.slf4j" % "slf4j-nop" % "1.6.4",
+                          "com.sap.db.jdbc" % "ngdbc" % "1.111.2"
                         )
     
