@@ -30,3 +30,8 @@ To install into local repo
 ```
 sbt publish-local
 ```
+
+Examples
+========
+
+[Hana Connect Example](https://github.wdf.sap.corp/I076326/slick-hana/blob/master/src/main/scala/slick/example/HanaConnectExample.scala)
