@@ -1,4 +1,4 @@
-package slick.hana.example
+package slick.example
 
 import slick.jdbc.HanaProfile.api._
 import slick.jdbc.meta.MTable
@@ -23,7 +23,7 @@ object HanaConnectExample extends App {
 
     println(students.schema.createStatements.toList.head)
 
-    val tableChecker: Future[Vector[MTable]] = db.run(MTable.getTables("%STUDENTS%"))
+    val tableChecker: Future[Vector[MTable]] = db.run(MTable.getTables(Some(""), Some("TEST_CASE"), Some("STUDENTS"), None))
     val setupAction = DBIO.seq(
       students.schema.create,
 
@@ -34,7 +34,11 @@ object HanaConnectExample extends App {
     )
 
     val setupFuture = tableChecker.flatMap(result =>
-      db.run(setupAction)
+      if (result.isEmpty) {
+        db.run(setupAction)
+      } else {
+        Future.successful()
+      }
     )
 
     val update = students.filter(_.id === 1).map(record => (record.id, record.fullname)).update(1, "Jadu")
