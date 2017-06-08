@@ -19,12 +19,12 @@ class TableCUDBuilderTestSuite extends FunSuite with BeforeAndAfter {
   }
 
   test("upsert table with where clause") {
-    pending
-    val upsert = coffees.filter(_.name === "Espresso").map(record => (record.name, record.supID, record.price, record.sales, record.total))
+    val upsert = coffees.map(record => (record.name, record.supID, record.price, record.sales, record.total))
       .insertOrUpdate("Espresso", 150, 9.99, 0, 0)
 
     assert(upsert.statements.size === 1)
-    println(upsert.statements.head)
+    assert(upsert.statements.head === "upsert \"DUMMY_SCHEMA\".\"COFFEES\"(\"COF_NAME\", \"SUP_ID\", \"PRICE\", \"SALES\", \"TOTAL\")" +
+      " values(?, ?, ?, ?, ?) with primary key")
   }
 
   test("insert record into table") {
