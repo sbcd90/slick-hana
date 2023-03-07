@@ -1,10 +1,11 @@
 package slick.jdbc
 
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 import slick.jdbc.HanaProfile.api._
 import slick.jdbc.TestSuiteData._
 
-class TableCUDBuilderTestSuite extends FunSuite with BeforeAndAfter {
+class TableCUDBuilderTestSuite extends AnyFunSuite with BeforeAndAfter {
 
   before {
   }

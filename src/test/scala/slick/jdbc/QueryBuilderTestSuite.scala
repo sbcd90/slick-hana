@@ -1,10 +1,11 @@
 package slick.jdbc
 
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.funsuite.AnyFunSuite
 import slick.jdbc.HanaProfile.api._
 import slick.jdbc.TestSuiteData._
 
-class QueryBuilderTestSuite extends FunSuite with BeforeAndAfter {
+class QueryBuilderTestSuite extends AnyFunSuite with BeforeAndAfter {
   before {
 
   }
@@ -135,16 +136,16 @@ class QueryBuilderTestSuite extends FunSuite with BeforeAndAfter {
     val union = q1 union q2
     val unionStmt = union.result.statements.toList
     assert(unionStmt.size === 1)
-    assert(unionStmt.head === "select \"COF_NAME\" as x2, \"SUP_ID\" as x3, \"PRICE\" as x4, \"SALES\" as x5, \"TOTAL\" as x6 from" +
-      " \"DUMMY_SCHEMA\".\"COFFEES\" where \"PRICE\" < 8.0 union select \"COF_NAME\" as x2, \"SUP_ID\" as x3, \"PRICE\" as x4, \"SALES\" as x5," +
-      " \"TOTAL\" as x6 from \"DUMMY_SCHEMA\".\"COFFEES\" where \"PRICE\" > 9.0")
+    assert(unionStmt.head === "(select \"COF_NAME\" as x2, \"SUP_ID\" as x3, \"PRICE\" as x4, \"SALES\" as x5, \"TOTAL\" as x6 from" +
+      " \"DUMMY_SCHEMA\".\"COFFEES\" where \"PRICE\" < 8.0) union (select \"COF_NAME\" as x2, \"SUP_ID\" as x3, \"PRICE\" as x4, \"SALES\" as x5," +
+      " \"TOTAL\" as x6 from \"DUMMY_SCHEMA\".\"COFFEES\" where \"PRICE\" > 9.0)")
 
     val unionAll = q1 ++ q2
     val unionAllStmt = unionAll.result.statements.toList
     assert(unionAllStmt.size === 1)
-    assert(unionAllStmt.head === "select \"COF_NAME\" as x2, \"SUP_ID\" as x3, \"PRICE\" as x4, \"SALES\" as x5, \"TOTAL\" as x6 from \"DUMMY_SCHEMA\".\"COFFEES\"" +
-      " where \"PRICE\" < 8.0 union all select \"COF_NAME\" as x2, \"SUP_ID\" as x3, \"PRICE\" as x4, \"SALES\" as x5, \"TOTAL\" as x6 from \"DUMMY_SCHEMA\".\"COFFEES\"" +
-      " where \"PRICE\" > 9.0")
+    assert(unionAllStmt.head === "(select \"COF_NAME\" as x2, \"SUP_ID\" as x3, \"PRICE\" as x4, \"SALES\" as x5, \"TOTAL\" as x6 from \"DUMMY_SCHEMA\".\"COFFEES\"" +
+      " where \"PRICE\" < 8.0) union all (select \"COF_NAME\" as x2, \"SUP_ID\" as x3, \"PRICE\" as x4, \"SALES\" as x5, \"TOTAL\" as x6 from \"DUMMY_SCHEMA\".\"COFFEES\"" +
+      " where \"PRICE\" > 9.0)")
   }
 
   test("select with aggregates") {
