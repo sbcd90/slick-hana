@@ -5,7 +5,7 @@ import slick.{SlickException, ast}
 import slick.ast._
 import slick.basic.Capability
 import slick.compiler.CompilerState
-import slick.lifted.{HanaIndex, Index, PrimaryKey}
+import slick.lifted.{HanaIndex, Index}
 import slick.util.MacroSupport._
 import slick.relational.{HanaTable, HanaTableTypes}
 import slick.util.ConstArray
@@ -80,16 +80,6 @@ trait HanaProfile extends JdbcProfile {
       b.toString()
     }
 
-    override protected def createPrimaryKey(pk: PrimaryKey): String = {
-      if (pk.columns.size > 1)
-        throw new SlickException("Table " + tableNode.tableName + " defines multiple primary key columns in "
-          + pk.name)
-
-      val sb = new StringBuilder append "alter table " append quoteTableName(tableNode) append " add "
-      addPrimaryKey(pk, sb)
-      sb.toString()
-    }
-
     def addIndexToColumnList(columns: IndexedSeq[Node], sb: StringBuilder, requiredTableName: String, sort: Seq[String]) = {
       var first = true
       var count = 0
@@ -112,10 +102,6 @@ trait HanaProfile extends JdbcProfile {
   }
 
   class ColumnDDLBuilder(column: FieldSymbol) extends super.ColumnDDLBuilder(column) {
-    if (primaryKey) {
-      primaryKeyColumns += 1
-    }
-
     def appendHanaColumn(sb: StringBuilder, tableType: String) = {
       sb append quoteIdentifier(column.name) append ' '
       appendType(sb)
