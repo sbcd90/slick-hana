@@ -10,7 +10,7 @@ slick-hana
 `slick-hana` requires the dependency to SAP Hana Jdbc Driver. The dependency can be added like this:
 
 ```
-"com.sap.db.jdbc" % "ngdbc" % "1.111.2"
+"com.sap.cloud.db.jdbc" % "ngdbc" % "2.15.12",
 ```
 
 `slick-hana` is a scala module & can be compiled using
@@ -28,10 +28,10 @@ sbt run
 To install into local repo
 
 ```
-sbt publish-local
+sbt publishLocal
 ```
 
 Examples
 ========
 
-[Hana Connect Example](https://github.wdf.sap.corp/I076326/slick-hana/blob/master/src/main/scala/slick/example/HanaConnectExample.scala)
+[Hana Connect Example](https://github.com/akirafujiu/slick-hana/blob/main/src/main/scala/slick/example/HanaConnectExample.scala)
